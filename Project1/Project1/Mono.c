@@ -3,9 +3,10 @@
 #include<stdio.h>
 #include<string.h>
 #include<Windows.h>
+#include<stdlib.h>
 #define NO 5
 
-void generate_key(FILE* key);
+void generate_key();
 void Encryption(FILE* key);
 void Decryption(FILE* key);
 int printMenu();
@@ -16,22 +17,13 @@ void gotoxy(int x, int y) {
 }
 
 int main(void) {
-	FILE* key = fopen("key.txt", "w");
 	int menu=0;
-	
-
-	if (key == NULL) {
-		printf("FILE OPEN ERROR!\n");
-		return NO;
-	}
-
 	while (menu!=4) {
 		menu = printMenu();
-
-
+		FILE* key = fopen("key.txt", "r");
 		switch (menu) {
 		case 1:
-			generate_key(key);
+			generate_key();
 			break;
 		case 2:
 			Encryption(key);
@@ -45,10 +37,8 @@ int main(void) {
 			system("cls");
 			printf("메뉴를 정확히 입력해주세요!");
 		}
+		fclose(key);
 	}
-	if(key!=NULL)
-	fclose(key);
-
 }
 
 
@@ -69,6 +59,104 @@ int printMenu() {
 	else
 		return NO;
 }
-void generate_key(FILE* key){}
-void Encryption(FILE* key){}
-void Decryption(FILE* key){}
+void generate_key(){
+	FILE* key = fopen("key.txt", "w");
+	char a[26] = "abcdefghijklmnopqrstuvwxyz";
+	char key_string[53] = "0";
+	int i = 0;
+	int j = 26;
+	int ran = 0;
+
+	//key_string 0~25 인덱스에 알파벳 순서대로 입력
+	for (i = 0;i < 26;i++) {
+		key_string[i] = a[i];
+	}
+	//key_string 26~51 인덱스에 랜덤 알파벳 매핑
+	while (j != 52) {
+		ran = rand() % 26;
+		if (a[ran] != '\0') {
+			key_string[j] = a[ran];
+			a[ran] = 0;
+			j++;
+		}
+	}
+	key_string[52] = '\0';
+	fprintf(key, "%s\n", key_string);
+	printf("\n키값 생성 완료.\n\n");
+	Sleep(2000);
+	fclose(key);
+}
+void Encryption(FILE* key){
+	FILE* fp = fopen("plaintext.txt", "r");
+	FILE* fp1 = fopen("ciphertext.txt", "w");
+	char key_string[53] = "\0";
+	char plaintext[100][100] = { "\0" };
+	char ciphertext[100][100] = { "\0" };
+	int i = 0;
+	int j = 0;
+	int a = 0;
+
+	fscanf(key, "%s\n", key_string);
+	printf("\nkey_string :\n%s\n", key_string);
+	//파일 끝까지 읽기
+	while (!feof(fp)) {
+		fgets(plaintext[a], 100, fp);
+		while (plaintext[a][i] != '\0') {
+			for (j = 0;j < 26;j++) {
+				//key_string을 통해 평문에 해당하는 암호문 배열 생성
+				if (plaintext[a][i] == key_string[j]) {
+					ciphertext[a][i] = key_string[j + 26];
+				}
+				//평문의 띄워쓰기는 그대로 암호문에 대입
+				else if (plaintext[a][i] == ' ') {
+					ciphertext[a][i] = plaintext[a][i];
+				}
+			}
+			i++;
+		}
+		fprintf(fp1,"%s\n", ciphertext[a]);
+		a++;
+		i = 0;
+	}
+	fclose(fp);
+	fclose(fp1);
+	printf("\n암호화 완료.\n\n");
+	Sleep(2000);
+}
+void Decryption(FILE* key){
+	FILE* fp = fopen("plaintext.txt", "w");
+	FILE* fp1 = fopen("ciphertext.txt", "r");
+	char key_string[53] = "\0";
+	char plaintext[100][100] = { "\0" };
+	char ciphertext[100][100] = { "\0" };
+	int i = 0;
+	int j = 0;
+	int a = 0;
+	
+	fscanf(key, "%s\n", key_string);
+	printf("\nkey_string :\n%s\n", key_string);
+	//파일 끝까지 읽기
+	while (!feof(fp1)) {
+		fgets(ciphertext[a], 100, fp1);
+		while (ciphertext[a][i] != '\0') {
+			for (j = 26;j < 52;j++) {
+				//key_string을 통해 암호문에 해당하는 평문 배열 생성
+				if (ciphertext[a][i] == key_string[j]) {
+					plaintext[a][i] = key_string[j - 26];
+				}
+				//암호문의 띄워쓰기는 그대로 평문에 대입
+				else if (ciphertext[a][i] == ' ') {
+					plaintext[a][i] = ciphertext[a][i];
+				}
+			}
+			i++;
+		}
+		fprintf(fp, "%s\n", plaintext[a]);
+		a++;
+		i = 0;
+	}
+	fclose(fp);
+	fclose(fp1);
+	printf("\n복호화 완료.\n\n");
+	Sleep(2000);	
+}
