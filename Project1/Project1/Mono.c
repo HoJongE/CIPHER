@@ -4,6 +4,8 @@
 #include<string.h>
 #include<Windows.h>
 #include<stdlib.h>
+#include<time.h>
+
 #define NO 5
 
 void generate_key();
@@ -18,9 +20,11 @@ void gotoxy(int x, int y) {
 
 int main(void) {
 	int menu=0;
+	srand(time(NULL));
 	while (menu!=4) {
 		menu = printMenu();
 		FILE* key = fopen("key.txt", "r");
+		
 		switch (menu) {
 		case 1:
 			generate_key();
@@ -98,20 +102,18 @@ void Encryption(FILE* key){
 
 	fscanf(key, "%s\n", key_string);
 	printf("\nkey_string :\n%s\n", key_string);
+	printf("원문 내용: ");
 	//파일 끝까지 읽기
 	while (!feof(fp)) {
 		fgets(plaintext[a], 100, fp);
+		printf("%s\n", plaintext[a]);
 		while (plaintext[a][i] != '\0') {
-			for (j = 0;j < 26;j++) {
 				//key_string을 통해 평문에 해당하는 암호문 배열 생성
-				if (plaintext[a][i] == key_string[j]) {
-					ciphertext[a][i] = key_string[j + 26];
-				}
-				//평문의 띄워쓰기는 그대로 암호문에 대입
-				else if (plaintext[a][i] == ' ') {
-					ciphertext[a][i] = plaintext[a][i];
-				}
-			}
+			if (plaintext[a][i]>='a'&&plaintext[a][i]<='z') {
+				ciphertext[a][i] = key_string[plaintext[a][i]-'a' + 26];
+			}	
+			else
+				ciphertext[a][i] = plaintext[a][i];
 			i++;
 		}
 		fprintf(fp1,"%s\n", ciphertext[a]);
@@ -139,16 +141,15 @@ void Decryption(FILE* key){
 	while (!feof(fp1)) {
 		fgets(ciphertext[a], 100, fp1);
 		while (ciphertext[a][i] != '\0') {
-			for (j = 26;j < 52;j++) {
 				//key_string을 통해 암호문에 해당하는 평문 배열 생성
-				if (ciphertext[a][i] == key_string[j]) {
-					plaintext[a][i] = key_string[j - 26];
-				}
-				//암호문의 띄워쓰기는 그대로 평문에 대입
-				else if (ciphertext[a][i] == ' ') {
-					plaintext[a][i] = ciphertext[a][i];
+			if (ciphertext[a][i] >= 'a' && ciphertext[a][i] <= 'z') {
+				for (int x = 0; x < 26; x++) {
+					if (key_string[x + 26] == ciphertext[a][i])
+						plaintext[a][i] = key_string[x];
 				}
 			}
+				else  
+					plaintext[a][i] = ciphertext[a][i];
 			i++;
 		}
 		fprintf(fp, "%s\n", plaintext[a]);
