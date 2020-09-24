@@ -41,6 +41,7 @@ int main(void) {
 			system("cls");
 			printf("메뉴를 정확히 입력해주세요!");
 		}
+		if(key!=NULL)
 		fclose(key);
 	}
 }
@@ -53,7 +54,6 @@ int printMenu() {
 	printf("---------------------\n");
 	printf("|메뉴를 선택해주세요|\n");
 	printf("---------------------\n");
-
 	printf("1: key 생성 2: 암호화 3: 복호화 4:프로그램 종료\n");
 	printf("메뉴: ");
 	scanf("%d", &menu);
@@ -94,8 +94,8 @@ void Encryption(FILE* key){
 	FILE* fp = fopen("plaintext.txt", "r");
 	FILE* fp1 = fopen("ciphertext.txt", "w");
 	char key_string[53] = "\0";
-	char plaintext[100][100] = { "\0" };
-	char ciphertext[100][100] = { "\0" };
+	char plaintext[1000][100] = { "\0" };
+	char ciphertext[1000][100] = { "\0" };
 	int i = 0;
 	int j = 0;
 	int a = 0;
@@ -109,14 +109,17 @@ void Encryption(FILE* key){
 		printf("%s\n", plaintext[a]);
 		while (plaintext[a][i] != '\0') {
 				//key_string을 통해 평문에 해당하는 암호문 배열 생성
-			if (plaintext[a][i]>='a'&&plaintext[a][i]<='z') {
-				ciphertext[a][i] = key_string[plaintext[a][i]-'a' + 26];
+			if (plaintext[a][i]>='A') {
+				if (plaintext[a][i] <= 'Z')
+					ciphertext[a][i] = key_string[plaintext[a][i] - 'A' + 26];
+				else if (plaintext[a][i] <= 'z')
+					ciphertext[a][i] = key_string[plaintext[a][i] - 'a' + 26];
 			}	
 			else
 				ciphertext[a][i] = plaintext[a][i];
 			i++;
 		}
-		fprintf(fp1,"%s\n", ciphertext[a]);
+		fprintf(fp1,"%s", ciphertext[a]);
 		a++;
 		i = 0;
 	}
@@ -126,11 +129,11 @@ void Encryption(FILE* key){
 	Sleep(2000);
 }
 void Decryption(FILE* key){
-	FILE* fp = fopen("plaintext.txt", "w");
+	FILE* fp = fopen("plaintext1.txt", "w");
 	FILE* fp1 = fopen("ciphertext.txt", "r");
 	char key_string[53] = "\0";
-	char plaintext[100][100] = { "\0" };
-	char ciphertext[100][100] = { "\0" };
+	char plaintext[1000][100] = { "\0" };
+	char ciphertext[1000][100] = { "\0" };
 	int i = 0;
 	int j = 0;
 	int a = 0;
@@ -152,7 +155,7 @@ void Decryption(FILE* key){
 					plaintext[a][i] = ciphertext[a][i];
 			i++;
 		}
-		fprintf(fp, "%s\n", plaintext[a]);
+		fprintf(fp, "%s", plaintext[a]);
 		a++;
 		i = 0;
 	}
